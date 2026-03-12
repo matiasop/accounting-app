@@ -1,0 +1,1 @@
+ALTER TABLE `accounts` ADD `priority` integer DEFAULT 5 NOT NULL;

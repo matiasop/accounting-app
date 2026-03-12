@@ -8,22 +8,45 @@ import {
 } from "@/constants/categories"
 
 describe("category catalog", () => {
-	it("keeps all categories at default priority 5", () => {
-		expect(CATEGORY_CATALOG.every((category) => category.priority === 5)).toBe(
-			true,
-		)
+	it("keeps category priorities within the supported range", () => {
+		expect(
+			CATEGORY_CATALOG.every(
+				(category) => category.priority >= 1 && category.priority <= 10,
+			),
+		).toBe(true)
 		expect(
 			CATEGORY_CATALOG.every((category) =>
-				category.subcategories.every((subcategory) => subcategory.priority === 5),
+				category.subcategories.every(
+					(subcategory) =>
+						subcategory.priority >= 1 && subcategory.priority <= 10,
+				),
 			),
 		).toBe(true)
 	})
 
-	it("preserves declaration order when priorities are tied", () => {
-		expect(ORDERED_CATEGORIES).toEqual(
-			CATEGORY_CATALOG.map((category) => category.value),
-		)
-		expect(getOrderedSubcategories("food")).toEqual(CATEGORIES.food)
+	it("orders categories and subcategories by descending priority", () => {
+		expect(ORDERED_CATEGORIES).toEqual([
+			"food",
+			"income",
+			"entertainment",
+			"housing",
+			"utilities",
+			"wellness",
+			"clothing",
+			"movement",
+			"transport",
+			"exercise",
+		])
+		expect(getOrderedSubcategories("food")).toEqual([
+			"groceries",
+			"restaurant",
+			"snacks",
+			"bars_going_out",
+			"alcohol",
+			"drinks",
+			"delivery",
+		])
+		expect(getOrderedSubcategories("wellness")).toEqual(CATEGORIES.wellness)
 	})
 
 	it("returns an empty list for an unknown category", () => {

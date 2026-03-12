@@ -1,0 +1,17 @@
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "tanstack-start-app",
+	"compatibility_date": "2025-09-02",
+	"compatibility_flags": [
+		"nodejs_compat"
+	],
+	"main": "@tanstack/react-start/server-entry",
+	"d1_databases": [
+		{
+			"binding": "accounting_db",
+			"database_name": "accounting-db",
+			"database_id": "3af86c4f-ab62-4e1a-9f04-88eeb902b141",
+			"migrations_dir": "./drizzle"
+		}
+	]
+}

@@ -136,6 +136,16 @@ VALUES
 		'expense'
 	),
 	(
+		'2026-03-13T18:00:00Z',
+		'Hotel booking',
+		(SELECT id FROM accounts WHERE name = 'Visa Card'),
+		(SELECT id FROM accounts WHERE special_role = 'expenses'),
+		220000,
+		'vacation',
+		'lodging',
+		'expense'
+	),
+	(
 		'2026-03-14T14:00:00Z',
 		'Medication',
 		(SELECT id FROM accounts WHERE name = 'Checking Account'),

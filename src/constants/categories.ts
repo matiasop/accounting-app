@@ -95,6 +95,19 @@ export const CATEGORY_CATALOG = [
 		],
 	},
 	{
+		value: "vacation",
+		priority: 6,
+		subcategories: [
+			{ value: "uncategorized", priority: 9 },
+			{ value: "travel_tickets", priority: 8 },
+			{ value: "lodging", priority: 7 },
+			{ value: "transport", priority: 6 },
+			{ value: "food", priority: 5 },
+			{ value: "activities", priority: 4 },
+			{ value: "shopping", priority: 3 },
+		],
+	},
+	{
 		value: "entertainment",
 		priority: 6,
 		subcategories: [
@@ -105,7 +118,6 @@ export const CATEGORY_CATALOG = [
 			{ value: "events", priority: 5 },
 			{ value: "video_games", priority: 5 },
 			{ value: "games", priority: 5 },
-			{ value: "vacation", priority: 5 },
 			{ value: "gifts", priority: 5 },
 			{ value: "dates", priority: 5 },
 			{ value: "paragliding", priority: 5 },
@@ -116,7 +128,10 @@ export const CATEGORY_CATALOG = [
 		value: "exercise",
 		priority: 1,
 		subcategories: [
-			{ value: "gym", priority: 5 },
+			{ value: "gym", priority: 9 },
+			{ value: "climbing", priority: 8 },
+			{ value: "running", priority: 7 },
+			{ value: "classes", priority: 6 },
 			{ value: "equipment", priority: 5 },
 		],
 	},
@@ -190,4 +205,26 @@ export function isValidSubcategory(
 	return (CATEGORIES[category as Category] as readonly string[]).includes(
 		subcategory,
 	);
+}
+
+export function getDefaultSubcategory(category: string): string {
+	return category === "vacation" ? "uncategorized" : "";
+}
+
+export function normalizeSubcategory(
+	category: string,
+	subcategory: string | null | undefined,
+): string | null {
+	if (
+		category === "vacation" &&
+		(subcategory === null || subcategory === undefined || subcategory === "")
+	) {
+		return "uncategorized";
+	}
+
+	if (subcategory === null || subcategory === undefined || subcategory === "") {
+		return null;
+	}
+
+	return subcategory;
 }

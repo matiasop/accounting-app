@@ -10,7 +10,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import * as ShadcnSelect from "@/components/ui/select";
 import {
+	getDefaultSubcategory,
 	getOrderedSubcategories,
+	normalizeSubcategory,
 	ORDERED_CATEGORIES,
 } from "@/constants/categories";
 import { createEntry, updateEntry } from "@/functions/entries";
@@ -144,7 +146,9 @@ function CreateEntry() {
 					creditAccountId: editDefaults.creditAccountId,
 					amount: String(editEntry.amount),
 					category: editEntry.category,
-					subcategory: editEntry.subcategory ?? "",
+					subcategory:
+						normalizeSubcategory(editEntry.category, editEntry.subcategory) ??
+						"",
 				}
 			: {
 					date: utcDate(),
@@ -159,7 +163,7 @@ function CreateEntry() {
 						regularAccounts.length > 1 ? String(regularAccounts[1].id) : "",
 					amount: "",
 					category: "",
-					subcategory: "",
+					subcategory: getDefaultSubcategory(""),
 				};
 
 	const form = useForm({
@@ -188,7 +192,8 @@ function CreateEntry() {
 				debitAccountId,
 				amount: Number(value.amount),
 				category: value.category,
-				subcategory: value.subcategory || undefined,
+				subcategory:
+					normalizeSubcategory(value.category, value.subcategory) ?? undefined,
 			};
 			try {
 				if (isEditing) {
@@ -504,20 +509,19 @@ function CreateEntry() {
 							</div>
 
 							<div className="grid gap-4 sm:grid-cols-2">
-								<form.Field
-									name="category"
-									listeners={{
-										onChange: () => {
-											form.setFieldValue("subcategory", "");
-										},
-									}}
-								>
+								<form.Field name="category">
 									{(field) => (
 										<div className="space-y-1.5">
 											<Label>Category</Label>
 											<ShadcnSelect.Select
 												value={field.state.value}
-												onValueChange={(v) => field.handleChange(v)}
+												onValueChange={(v) => {
+													field.handleChange(v);
+													form.setFieldValue(
+														"subcategory",
+														getDefaultSubcategory(v),
+													);
+												}}
 											>
 												<ShadcnSelect.SelectTrigger className="w-full">
 													<ShadcnSelect.SelectValue placeholder="Select category" />

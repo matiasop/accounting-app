@@ -4,13 +4,18 @@ import {
 	sankey,
 	sankeyLinkHorizontal,
 } from "d3-sankey";
-import { useId, useMemo } from "react";
+import { useMemo } from "react";
+import { ReportDateRangeControls } from "@/components/reports/ReportDateRangeControls";
 import {
 	buildCashFlowSankey,
 	type CashFlowSankeyData,
 	type CashFlowSankeyLink,
 	type CashFlowSankeyNode,
 } from "@/lib/reports/cash-flow";
+import type {
+	ReportDatePreset,
+	ReportDateRangeKey,
+} from "@/lib/reports/date-range";
 
 const CHART_WIDTH = 1360;
 const CHART_MIN_HEIGHT = 460;
@@ -30,9 +35,11 @@ type CashFlowEntries = Parameters<typeof buildCashFlowSankey>[0];
 
 interface CashFlowSankeyReportProps {
 	entries: CashFlowEntries;
+	preset: ReportDatePreset;
 	dateFrom: string;
 	dateTo: string;
-	onDateChange: (key: "dateFrom" | "dateTo", value: string) => void;
+	onPresetChange: (preset: ReportDatePreset) => void;
+	onDateChange: (key: ReportDateRangeKey, value: string) => void;
 }
 
 type LayoutNode = CashFlowSankeyNode & {
@@ -77,6 +84,7 @@ function createLayoutInput(data: CashFlowSankeyData) {
 		nodes.unshift({
 			id: "hidden:income-anchor",
 			kind: "income",
+			label: "",
 			category: null,
 			amount: 0,
 			hidden: true,
@@ -94,6 +102,7 @@ function createLayoutInput(data: CashFlowSankeyData) {
 		nodes.push({
 			id: "hidden:expense-anchor",
 			kind: "expense",
+			label: "",
 			category: null,
 			amount: 0,
 			hidden: true,
@@ -162,10 +171,7 @@ function CashFlowDiagram({ data }: { data: CashFlowSankeyData }) {
 			})
 			.extent([
 				[CHART_MARGIN_LEFT, CHART_MARGIN_TOP],
-				[
-					CHART_WIDTH - CHART_MARGIN_RIGHT,
-					graphHeight - CHART_MARGIN_BOTTOM,
-				],
+				[CHART_WIDTH - CHART_MARGIN_RIGHT, graphHeight - CHART_MARGIN_BOTTOM],
 			]);
 
 		return {
@@ -305,7 +311,9 @@ function CashFlowDiagram({ data }: { data: CashFlowSankeyData }) {
 											: (node.x1 ?? 0) + 12
 									}
 									y={centerY}
-									textAnchor={(node.sourceLinks?.length ?? 0) > 0 ? "end" : "start"}
+									textAnchor={
+										(node.sourceLinks?.length ?? 0) > 0 ? "end" : "start"
+									}
 									dominantBaseline="middle"
 									fill="var(--color-foreground)"
 									className={LABEL_FONT_CLASS}
@@ -343,15 +351,14 @@ function CashFlowDiagram({ data }: { data: CashFlowSankeyData }) {
 
 export function CashFlowSankeyReport({
 	entries,
+	preset,
 	dateFrom,
 	dateTo,
+	onPresetChange,
 	onDateChange,
 }: CashFlowSankeyReportProps) {
-	const inputId = useId();
 	const data = useMemo(() => buildCashFlowSankey(entries), [entries]);
 	const hasChartData = data.incomeTotal > 0 || data.expenseTotal > 0;
-	const dateFromId = `${inputId}-date-from`;
-	const dateToId = `${inputId}-date-to`;
 
 	return (
 		<div className="space-y-6">
@@ -365,38 +372,13 @@ export function CashFlowSankeyReport({
 				</p>
 			</div>
 
-			<div className="flex flex-wrap items-end gap-4">
-				<div className="flex flex-col gap-1">
-					<label
-						htmlFor={dateFromId}
-						className="text-xs font-bold uppercase tracking-widest text-muted-foreground"
-					>
-						From
-					</label>
-					<input
-						id={dateFromId}
-						type="date"
-						value={dateFrom}
-						onChange={(event) => onDateChange("dateFrom", event.target.value)}
-						className="h-9 rounded-sm border-2 border-black bg-white px-3 py-1 text-sm shadow-brutal-sm focus-visible:outline-none focus-visible:shadow-brutal"
-					/>
-				</div>
-				<div className="flex flex-col gap-1">
-					<label
-						htmlFor={dateToId}
-						className="text-xs font-bold uppercase tracking-widest text-muted-foreground"
-					>
-						To
-					</label>
-					<input
-						id={dateToId}
-						type="date"
-						value={dateTo}
-						onChange={(event) => onDateChange("dateTo", event.target.value)}
-						className="h-9 rounded-sm border-2 border-black bg-white px-3 py-1 text-sm shadow-brutal-sm focus-visible:outline-none focus-visible:shadow-brutal"
-					/>
-				</div>
-			</div>
+			<ReportDateRangeControls
+				preset={preset}
+				dateFrom={dateFrom}
+				dateTo={dateTo}
+				onPresetChange={onPresetChange}
+				onDateChange={onDateChange}
+			/>
 
 			<div className="grid gap-4 sm:grid-cols-3">
 				<SummaryCard
@@ -423,8 +405,8 @@ export function CashFlowSankeyReport({
 			</div>
 
 			<div className="rounded-sm border-2 border-black bg-primary/10 px-4 py-3 text-sm font-medium text-foreground shadow-brutal-sm">
-				The net for the selected period is summarized above and also balances the
-				diagram so incoming and outgoing flow widths stay aligned.
+				The net for the selected period is summarized above and also balances
+				the diagram so incoming and outgoing flow widths stay aligned.
 			</div>
 
 			{hasChartData ? (

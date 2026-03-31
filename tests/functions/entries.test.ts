@@ -130,6 +130,18 @@ describe("entry handlers", () => {
 			expect(entry.subcategory).toBeNull()
 		})
 
+		it("normalizes vacation entries without subcategory", async () => {
+			const entry = await handleCreateEntry(testDb.db, {
+				date: "2025-01-15T10:00:00Z",
+				description: "Hotel booking",
+				creditAccountId: cashId,
+				debitAccountId: expensesAccountId,
+				amount: 150000,
+				category: "vacation",
+			})
+			expect(entry.subcategory).toBe("uncategorized")
+		})
+
 		it("throws NotFoundError when credit account does not exist", async () => {
 			await expect(
 				handleCreateEntry(testDb.db, {
@@ -387,6 +399,20 @@ describe("entry handlers", () => {
 				category: "income",
 			})
 			expect(updated.type).toBe("income")
+		})
+
+		it("normalizes vacation updates without subcategory", async () => {
+			const updated = await handleUpdateEntry(testDb.db, {
+				id: entryId,
+				date: "2025-01-15T10:00:00Z",
+				description: "Vacation lodging",
+				creditAccountId: cashId,
+				debitAccountId: expensesAccountId,
+				amount: 1000,
+				category: "vacation",
+			})
+			expect(updated.category).toBe("vacation")
+			expect(updated.subcategory).toBe("uncategorized")
 		})
 
 		it("throws NotFoundError for nonexistent entry", async () => {

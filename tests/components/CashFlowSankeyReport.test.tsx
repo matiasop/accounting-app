@@ -36,8 +36,10 @@ describe("CashFlowSankeyReport", () => {
 						type: "movement",
 					}),
 				]}
+				preset="monthToDate"
 				dateFrom="2025-01-01"
 				dateTo="2025-01-31"
+				onPresetChange={vi.fn()}
 				onDateChange={vi.fn()}
 			/>,
 		)
@@ -54,12 +56,17 @@ describe("CashFlowSankeyReport", () => {
 					mockEntry({ id: 1, amount: 8000, category: "income", type: "income" }),
 					mockEntry({ id: 2, amount: 3000, category: "food", type: "expense" }),
 				]}
+				preset="monthToDate"
 				dateFrom="2025-01-01"
 				dateTo="2025-01-31"
+				onPresetChange={vi.fn()}
 				onDateChange={vi.fn()}
 			/>,
 		)
 
+		expect(screen.getByRole("combobox", { name: "Date range preset" }).textContent).toContain(
+			"Month to Date",
+		)
 		expect((screen.getByLabelText("From") as HTMLInputElement).value).toBe(
 			"2025-01-01",
 		)

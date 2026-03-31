@@ -1,10 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useId, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
+import { ReportDateRangeControls } from "@/components/reports/ReportDateRangeControls";
 import { Button } from "@/components/ui/button";
 import {
-	firstDayOfMonth,
-	lastDayOfMonth,
+	applyReportDateInputChange,
+	applyReportDatePreset,
+	normalizeReportDateRange,
 	reportDateRangeSearchSchema,
 } from "@/lib/reports/date-range";
 import { entriesQueryOptions } from "@/queries/entries";
@@ -14,14 +16,14 @@ export const Route = createFileRoute("/reports/")({
 	component: ReportsPage,
 	validateSearch: (search) => reportDateRangeSearchSchema.parse(search),
 	loaderDeps: ({ search }) => ({
+		preset: search.preset,
 		dateFrom: search.dateFrom,
 		dateTo: search.dateTo,
 	}),
 	loader: ({ context, deps }) => {
-		const from = deps.dateFrom ?? firstDayOfMonth();
-		const to = deps.dateTo ?? lastDayOfMonth();
+		const { dateFrom, dateTo } = normalizeReportDateRange(deps);
 		return context.queryClient.ensureQueryData(
-			entriesQueryOptions({ dateFrom: from, dateTo: to }),
+			entriesQueryOptions({ dateFrom, dateTo }),
 		);
 	},
 });
@@ -50,12 +52,8 @@ interface SubcategoryGroup {
 function ReportsPage() {
 	const navigate = useNavigate();
 	const search = Route.useSearch();
-	const dateInputId = useId();
-
-	const dateFrom = search.dateFrom ?? firstDayOfMonth();
-	const dateTo = search.dateTo ?? lastDayOfMonth();
-	const dateFromId = `${dateInputId}-date-from`;
-	const dateToId = `${dateInputId}-date-to`;
+	const reportDateRange = normalizeReportDateRange(search);
+	const { preset, dateFrom, dateTo } = reportDateRange;
 
 	const [breakdownMode, setBreakdownMode] = useState<BreakdownMode>("category");
 
@@ -134,10 +132,25 @@ function ReportsPage() {
 	}, [entries]);
 
 	// ── Handlers ───────────────────────────────────────────────────────────
-	function handleDateChange(key: "dateFrom" | "dateTo", value: string) {
+	function handlePresetChange(value: (typeof reportDateRange)["preset"]) {
+		const nextRange = applyReportDatePreset({ dateFrom, dateTo }, value);
 		navigate({
 			to: "/reports",
-			search: (prev) => ({ ...prev, [key]: value || undefined }),
+			search: nextRange,
+			replace: true,
+		});
+	}
+
+	function handleDateChange(key: "dateFrom" | "dateTo", value: string) {
+		if (!value) return;
+		const nextRange = applyReportDateInputChange(
+			{ dateFrom, dateTo },
+			key,
+			value,
+		);
+		navigate({
+			to: "/reports",
+			search: nextRange,
 			replace: true,
 		});
 	}
@@ -152,44 +165,21 @@ function ReportsPage() {
 						Reports
 					</h1>
 					<Button variant="outline" asChild>
-						<Link to="/reports/cash-flow" search={{ dateFrom, dateTo }}>
+						<Link to="/reports/cash-flow" search={reportDateRange}>
 							Cash Flow Sankey
 						</Link>
 					</Button>
 				</div>
 
 				{/* Date range controls */}
-				<div className="mb-6 flex flex-wrap items-end gap-4">
-					<div className="flex flex-col gap-1">
-						<label
-							htmlFor={dateFromId}
-							className="text-xs font-bold uppercase tracking-widest text-muted-foreground"
-						>
-							From
-						</label>
-						<input
-							id={dateFromId}
-							type="date"
-							value={dateFrom}
-							onChange={(e) => handleDateChange("dateFrom", e.target.value)}
-							className="h-9 rounded-sm border-2 border-black bg-white px-3 py-1 text-sm shadow-brutal-sm focus-visible:outline-none focus-visible:shadow-brutal"
-						/>
-					</div>
-					<div className="flex flex-col gap-1">
-						<label
-							htmlFor={dateToId}
-							className="text-xs font-bold uppercase tracking-widest text-muted-foreground"
-						>
-							To
-						</label>
-						<input
-							id={dateToId}
-							type="date"
-							value={dateTo}
-							onChange={(e) => handleDateChange("dateTo", e.target.value)}
-							className="h-9 rounded-sm border-2 border-black bg-white px-3 py-1 text-sm shadow-brutal-sm focus-visible:outline-none focus-visible:shadow-brutal"
-						/>
-					</div>
+				<div className="mb-6">
+					<ReportDateRangeControls
+						preset={preset}
+						dateFrom={dateFrom}
+						dateTo={dateTo}
+						onPresetChange={handlePresetChange}
+						onDateChange={handleDateChange}
+					/>
 				</div>
 
 				{/* Summary cards */}

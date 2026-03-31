@@ -4,8 +4,9 @@ import { ArrowLeft } from "lucide-react";
 import { CashFlowSankeyReport } from "@/components/reports/CashFlowSankeyReport";
 import { Button } from "@/components/ui/button";
 import {
-	firstDayOfMonth,
-	lastDayOfMonth,
+	applyReportDateInputChange,
+	applyReportDatePreset,
+	normalizeReportDateRange,
 	reportDateRangeSearchSchema,
 } from "@/lib/reports/date-range";
 import { entriesQueryOptions } from "@/queries/entries";
@@ -14,14 +15,14 @@ export const Route = createFileRoute("/reports/cash-flow")({
 	component: CashFlowSankeyPage,
 	validateSearch: (search) => reportDateRangeSearchSchema.parse(search),
 	loaderDeps: ({ search }) => ({
+		preset: search.preset,
 		dateFrom: search.dateFrom,
 		dateTo: search.dateTo,
 	}),
 	loader: ({ context, deps }) => {
-		const from = deps.dateFrom ?? firstDayOfMonth();
-		const to = deps.dateTo ?? lastDayOfMonth();
+		const { dateFrom, dateTo } = normalizeReportDateRange(deps);
 		return context.queryClient.ensureQueryData(
-			entriesQueryOptions({ dateFrom: from, dateTo: to }),
+			entriesQueryOptions({ dateFrom, dateTo }),
 		);
 	},
 });
@@ -29,18 +30,32 @@ export const Route = createFileRoute("/reports/cash-flow")({
 function CashFlowSankeyPage() {
 	const navigate = useNavigate();
 	const search = Route.useSearch();
-
-	const dateFrom = search.dateFrom ?? firstDayOfMonth();
-	const dateTo = search.dateTo ?? lastDayOfMonth();
+	const reportDateRange = normalizeReportDateRange(search);
+	const { preset, dateFrom, dateTo } = reportDateRange;
 
 	const { data: entries = [] } = useQuery(
 		entriesQueryOptions({ dateFrom, dateTo }),
 	);
 
-	function handleDateChange(key: "dateFrom" | "dateTo", value: string) {
+	function handlePresetChange(value: (typeof reportDateRange)["preset"]) {
+		const nextRange = applyReportDatePreset({ dateFrom, dateTo }, value);
 		navigate({
 			to: "/reports/cash-flow",
-			search: (prev) => ({ ...prev, [key]: value || undefined }),
+			search: nextRange,
+			replace: true,
+		});
+	}
+
+	function handleDateChange(key: "dateFrom" | "dateTo", value: string) {
+		if (!value) return;
+		const nextRange = applyReportDateInputChange(
+			{ dateFrom, dateTo },
+			key,
+			value,
+		);
+		navigate({
+			to: "/reports/cash-flow",
+			search: nextRange,
 			replace: true,
 		});
 	}
@@ -50,7 +65,7 @@ function CashFlowSankeyPage() {
 			<div className="mx-auto max-w-[92rem]">
 				<div className="mb-6">
 					<Button variant="outline" size="sm" asChild>
-						<Link to="/reports" search={{ dateFrom, dateTo }}>
+						<Link to="/reports" search={reportDateRange}>
 							<ArrowLeft />
 							Back to Reports
 						</Link>
@@ -59,8 +74,10 @@ function CashFlowSankeyPage() {
 
 				<CashFlowSankeyReport
 					entries={entries}
+					preset={preset}
 					dateFrom={dateFrom}
 					dateTo={dateTo}
+					onPresetChange={handlePresetChange}
 					onDateChange={handleDateChange}
 				/>
 			</div>

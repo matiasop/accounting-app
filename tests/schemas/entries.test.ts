@@ -111,10 +111,34 @@ describe("createEntrySchema", () => {
 	it("accepts valid category+subcategory pair", () => {
 		const result = createEntrySchema.safeParse({
 			...validEntry,
-			category: "transport",
-			subcategory: "gas",
+			category: "vacation",
+			subcategory: "travel_tickets",
 		})
 		expect(result.success).toBe(true)
+	})
+
+	it("accepts valid exercise subcategories", () => {
+		const climbingResult = createEntrySchema.safeParse({
+			...validEntry,
+			category: "exercise",
+			subcategory: "climbing",
+		})
+		const runningResult = createEntrySchema.safeParse({
+			...validEntry,
+			category: "exercise",
+			subcategory: "running",
+		})
+		expect(climbingResult.success).toBe(true)
+		expect(runningResult.success).toBe(true)
+	})
+
+	it("rejects legacy entertainment vacation pair", () => {
+		const result = createEntrySchema.safeParse({
+			...validEntry,
+			category: "entertainment",
+			subcategory: "vacation",
+		})
+		expect(result.success).toBe(false)
 	})
 
 	it("rejects empty description", () => {

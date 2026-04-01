@@ -34,6 +34,10 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
         content: 'width=device-width, initial-scale=1',
       },
       {
+        name: 'theme-color',
+        content: '#FFD12E',
+      },
+      {
         title: 'Accounting',
       },
     ],
@@ -41,6 +45,21 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
       {
         rel: 'stylesheet',
         href: appCss,
+      },
+      {
+        rel: 'manifest',
+        href: '/manifest.json',
+      },
+      {
+        rel: 'icon',
+        href: '/icon.svg',
+        type: 'image/svg+xml',
+      },
+      {
+        rel: 'icon',
+        href: '/icon-32.png',
+        type: 'image/png',
+        sizes: '32x32',
       },
     ],
   }),

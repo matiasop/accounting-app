@@ -117,6 +117,15 @@ describe("createEntrySchema", () => {
 		expect(result.success).toBe(true)
 	})
 
+	it("accepts valid utilities loan pair", () => {
+		const result = createEntrySchema.safeParse({
+			...validEntry,
+			category: "utilities",
+			subcategory: "loan",
+		})
+		expect(result.success).toBe(true)
+	})
+
 	it("accepts valid exercise subcategories", () => {
 		const climbingResult = createEntrySchema.safeParse({
 			...validEntry,

@@ -130,6 +130,21 @@ describe("entry handlers", () => {
 			expect(entry.subcategory).toBeNull()
 		})
 
+		it("creates utilities loan entries with the provided subcategory", async () => {
+			const entry = await handleCreateEntry(testDb.db, {
+				date: "2025-01-15T10:00:00Z",
+				description: "Loan repayment",
+				creditAccountId: cashId,
+				debitAccountId: expensesAccountId,
+				amount: 25000,
+				category: "utilities",
+				subcategory: "loan",
+			})
+			expect(entry.category).toBe("utilities")
+			expect(entry.subcategory).toBe("loan")
+			expect(entry.type).toBe("expense")
+		})
+
 		it("normalizes vacation entries without subcategory", async () => {
 			const entry = await handleCreateEntry(testDb.db, {
 				date: "2025-01-15T10:00:00Z",
@@ -385,6 +400,22 @@ describe("entry handlers", () => {
 			expect(updated.amount).toBe(2000)
 			expect(updated.date).toBe("2025-02-01T12:00:00Z")
 			expect(updated.category).toBe("food")
+		})
+
+		it("updates entries to utilities loan", async () => {
+			const updated = await handleUpdateEntry(testDb.db, {
+				id: entryId,
+				date: "2025-01-15T10:00:00Z",
+				description: "Loan payment",
+				creditAccountId: cashId,
+				debitAccountId: expensesAccountId,
+				amount: 1000,
+				category: "utilities",
+				subcategory: "loan",
+			})
+			expect(updated.category).toBe("utilities")
+			expect(updated.subcategory).toBe("loan")
+			expect(updated.type).toBe("expense")
 		})
 
 		it("recomputes type when accounts change", async () => {

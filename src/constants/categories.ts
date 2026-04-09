@@ -64,6 +64,7 @@ export const CATEGORY_CATALOG = [
 			{ value: "gas", priority: 5 },
 			{ value: "internet", priority: 5 },
 			{ value: "cellphone", priority: 5 },
+			{ value: "loan", priority: 5 },
 			{ value: "adjustment", priority: 5 },
 			{ value: "taxes", priority: 1 },
 		],

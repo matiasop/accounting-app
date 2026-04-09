@@ -49,6 +49,16 @@ describe("category catalog", () => {
 			"drinks",
 			"delivery",
 		])
+		expect(getOrderedSubcategories("utilities")).toEqual([
+			"electricity",
+			"water",
+			"gas",
+			"internet",
+			"cellphone",
+			"loan",
+			"adjustment",
+			"taxes",
+		])
 		expect(getOrderedSubcategories("wellness")).toEqual(CATEGORIES.wellness)
 		expect(getOrderedSubcategories("vacation")).toEqual([
 			"uncategorized",

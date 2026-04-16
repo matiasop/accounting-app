@@ -136,6 +136,16 @@ VALUES
 		'expense'
 	),
 	(
+		'2026-03-13T09:00:00Z',
+		'Claude subscription',
+		(SELECT id FROM accounts WHERE name = 'Visa Card'),
+		(SELECT id FROM accounts WHERE special_role = 'expenses'),
+		22000,
+		'work_tools',
+		'claude',
+		'expense'
+	),
+	(
 		'2026-03-13T18:00:00Z',
 		'Hotel booking',
 		(SELECT id FROM accounts WHERE name = 'Visa Card'),

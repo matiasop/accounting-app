@@ -32,6 +32,7 @@ describe("category catalog", () => {
 			"income",
 			"vacation",
 			"entertainment",
+			"work_tools",
 			"housing",
 			"utilities",
 			"wellness",
@@ -69,6 +70,12 @@ describe("category catalog", () => {
 			"activities",
 			"shopping",
 		])
+		expect(getOrderedSubcategories("work_tools")).toEqual([
+			"claude",
+			"chatgpt",
+			"excel",
+			"other",
+		])
 		expect(getOrderedSubcategories("exercise")).toEqual([
 			"gym",
 			"climbing",
@@ -87,6 +94,7 @@ describe("category catalog", () => {
 		expect(isValidSubcategory("food", "gas")).toBe(false)
 		expect(isValidSubcategory("vacation", "travel_tickets")).toBe(true)
 		expect(isValidSubcategory("exercise", "climbing")).toBe(true)
+		expect(isValidSubcategory("work_tools", "claude")).toBe(true)
 		expect(isValidSubcategory("entertainment", "vacation")).toBe(false)
 		expect(isValidSubcategory("unknown", "groceries")).toBe(false)
 	})

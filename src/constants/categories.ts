@@ -126,6 +126,16 @@ export const CATEGORY_CATALOG = [
 		],
 	},
 	{
+		value: "work_tools",
+		priority: 6,
+		subcategories: [
+			{ value: "claude", priority: 5 },
+			{ value: "chatgpt", priority: 5 },
+			{ value: "excel", priority: 5 },
+			{ value: "other", priority: 5 },
+		],
+	},
+	{
 		value: "exercise",
 		priority: 1,
 		subcategories: [
